@@ -22,7 +22,7 @@ class baseTorchKernel(baseKernel):
         if not self.kernel and self.utils:
             print(f'either of kernel or utils is not initialized for {self.name}')
 
-        dummy_input = torch.randn(*self.utils.inputDims)
+        dummy_input = self.utils.sampleInput
         buf = io.BytesIO()
         torch.onnx.export(
             self.kernel,
