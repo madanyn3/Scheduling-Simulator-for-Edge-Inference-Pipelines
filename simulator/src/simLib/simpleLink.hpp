@@ -35,7 +35,13 @@ c_SimpleLink<T>::c_SimpleLink(uint16_t x_size) {
 template <typename T>
 void
 canWrite() {
-    return ((m_size -  std::abs(m_head - m_tail)) != 0);
+    if (m_tail > m_tail) {
+        return ((m_tail - m_head) < m_size);
+    }
+    else {
+        if (m_head - m_tail == 1) return false;
+        return true;
+    }
 }
 
 template <typename T>
@@ -49,7 +55,7 @@ isFull() {return ((std::abs(m_head - m_tail) - m_size) == 0) }
 template <typaname T>
 T
 read() {
-    assert(m_array[m_head]);
+    assert(m_array[m_head] != T{0});
     return m_array[m_head];
 }
 

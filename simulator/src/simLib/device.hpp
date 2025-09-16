@@ -18,12 +18,12 @@ class c_Device{
     virtual void run()  = 0;
     virtual void end()  = 0;
     void tick() { m_simClock++; }
-    uint64_t simClock() { return m_simClock; }
+    static inline uint64_t simClock() { return m_simClock; }
 
   protected:
     uint8_t deviceID;
     uint8_t deviceType;
-    uint64_t m_simClock;
+    static uint64_t m_simClock;
 
 }
 
