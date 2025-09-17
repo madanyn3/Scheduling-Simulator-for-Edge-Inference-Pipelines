@@ -9,6 +9,18 @@
 #include <cstdint>
 #include "simLib/device.hpp"
 #include "simLib/simpleLink.hpp"
+#include "simLib/bus.hpp"
+
+ENUM {
+        READ,
+        WRITE,
+        GET_WAY
+    } e_ReqType;
+
+    ENUM {
+        HIT,
+        MISS
+    } e_CacheLineStatus;
 
 class c_cacheLine {
     public:
@@ -19,26 +31,16 @@ class c_cacheLine {
 }
 
 struct s_cacheReq {
-    ENUM {
-        READ,
-        WRITE,
-        GET_WAY
-    } e_ReqType;
-
     uint64_t addr;
     e_ReqType reqType;
+    c_cacheLine line;
 }
 
 struct s_cacheResp {
-    ENUM {
-        READ,
-        WRITE,
-        GET_WAY
-    } e_ReqType;
-
     uint64_t addr;
     int8_t way;
     e_ReqType reqType;
+    e_CacheLineStatus status;
     c_cacheLine line;
 }
 
@@ -55,25 +57,27 @@ class c_bufferEntry {
         T m_req;
 }
 
+template<typename T>
 class c_baseCache: public c_Device {
     public:
-        c_baseCache(std::size_t x_size, std::size_t x_latency);
-        int8_t getWay(uint64_t addr); // backdoor lookup to check if a line hits in the cache, no real access;
+        c_baseCache(std::size_t x_size, std::size_t x_latency, c_Bus<T, c_baseCache, s_cacheReq, c_cacheResp* x_bus);
+        int8_t getWay(uint64_t x_addr); // backdoor lookup to check if a line hits in the cache, no real access;
         void access(s_cacheReq x_req);
 
     private:
-        void addLine(uint64_t addr);
-        c_cacheLine getLine(uint64_t addr);
+        void addLine(uint64_t x_addr);
+        c_cacheLine read(uint64_t x_addr);
+        void write(uint64_t x_addr, c_cacheLine x_line);
         void processReq();
-        void processResp();
-
-        c_cacheLine* m_array;
+        void readInputs();
+        void writeOutputs();
+        std::deque<c_cacheLine> m_array;
         std::size_t m_size;
         std::size_t m_latency;
-        std::vector<c_bufferEntry> m_reqBuffer;
-        std::vector<c_bufferEnrty> m_respBuffer;
+        std::deque<c_bufferEntry> m_reqBuffer;
+        std::deque<c_bufferEnrty> m_respBuffer;
         uint64_t m_nextReqId;
-        uint64_t m_occupancy;
+        c_Bus<T, c_baseCache, Treq, c_cacheResp* m_bus;
 }
 
 #endif // SIMULATOR_SRC_SIMLIB_CACHE_HPP
